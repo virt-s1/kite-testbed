@@ -1,0 +1,96 @@
+---
+- hosts: local
+  gather_facts: no
+  become: no
+  tasks:
+    - name: read kernel/rhel-8 content
+      set_fact:
+        contents: "{{lookup('file', 'kernel/rhel-8') }}"
+
+    - name: download all kernel packages listed in kernel/rhel-8
+      get_url:
+        url: "{{ item }}"
+        dest: "kernel"
+        validate_certs: no
+      loop: "{{ contents.split('\n') }}"
+
+    - name: download all kernel packages
+      get_url:
+        url: "{{ contents.split('\n')[0] | regex_replace('kernel-', item)}}"
+        dest: "kernel"
+        validate_certs: no
+      loop:
+        - kernel-core-
+        - kernel-modules-
+        - kernel-modules-extra-
+      when: contents.split('\n') | length == 1
+
+    - name: get all file name in kernel folder
+      set_fact:
+        file_names: "{{ lookup('fileglob', 'kernel/*.rpm').split(',') | map('basename') | list }}"
+
+    - name: set kernel_nvr
+      set_fact:
+        kernel_nvr: "{{ '-'.join(file_names[0].split('-')[1:]) | regex_replace('.rpm', '') }}"
+
+    - name: keep private key permission to 600
+      file:
+        path: "key/identity"
+        mode: "0600"
+
+    - name: add guest ip into host guest group
+      add_host:
+        name: "{{ guest_ip }}"
+        groups: guest
+        files: "{{ file_names }}"
+        kernel_nvr: "{{ kernel_nvr }}"
+
+- hosts: guest
+  tasks:
+    - name: create temporary kernel directory
+      tempfile:
+        state: directory
+      register: temp_folder
+
+    - name: copy kernel to guest
+      copy:
+        src: "{{ playbook_dir }}/kernel"
+        dest: "{{ temp_folder.path }}"
+
+    - debug:
+        var: files
+
+    - debug:
+        msg: "{{ files | map('regex_replace', '^', temp_folder.path+'/kernel/') | join(', ') }}"
+
+    - name: install kernel on guest
+      dnf:
+        name: "{{ files | map('regex_replace', '^', temp_folder.path+'/kernel/') | join(', ') }}"
+        state: present
+        allow_downgrade: yes
+      become: yes
+
+    - name: reboot guest for new kernel to make effect
+      reboot:
+        reboot_timeout: 1200
+      become: yes
+
+    - name: get current kernel version
+      shell: uname -r
+      register: kernel_version
+
+    - name: show current kernel version
+      debug:
+        var: kernel_version.stdout
+
+    - name: checking kernel version
+      assert:
+        that:
+          - kernel_version.stdout == kernel_nvr
+        fail_msg: "Upgrade kernel to {{ kernel_nvr }} failed"
+        success_msg: "Upgrade kernel to {{ kernel_version.stdout }}"
+
+    - name: delete temporary kernel directory
+      file:
+        path: "{{ temp_folder.path }}"
+        state: absent
