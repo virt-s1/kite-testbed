@@ -10,8 +10,7 @@ jobs:
   firmware_test:
     strategy:
       matrix:
-        # firmware: [bios, efi]
-        firmware: [bios]
+        firmware: [bios, efi]
     name: Run kernel test on ESXi 7.0 VM ${{ matrix.firmware }}
     runs-on: kite-runner
 
@@ -41,9 +40,8 @@ jobs:
 
       - name: Run test
         run: |
-          cd kite-test && \
-          GUEST_IP=$(awk -F "=" '/guest_ip/ {print $2}' kite-deploy/inventory) && \
-          test/check-ltp -vst --user=admin --address=$GUEST_IP
+          GUEST_IP=$(awk -F "=" '/guest_ip/ {print $2}' kite-deploy/inventory)
+          cd kite-test && test/check-ltp -vst --user=admin --address=$GUEST_IP
 
       - uses: actions/upload-artifact@v2
         if: ${{ always() }}
