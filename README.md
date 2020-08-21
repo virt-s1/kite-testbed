@@ -1,6 +1,6 @@
 # kite-testbed
 
-Let's run your cloud test on AWS EC2, Azure, VMWare ESXi here. `kite-testbed` is just a testbed and provides a test environment for you.
+Let's run your cloud test on AWS EC2, VMWare ESXi, OpenStack here. `kite-testbed` is just a testbed and provides a test environment for you.
 
 ## How does `kite-testbed` work?
 
@@ -34,6 +34,8 @@ Currently, `kite-testbed` only supports kernel test. To run a kernel test, what 
   * `ESXi 7.0`
     * `BIOS` (AMD CPU with `VMXNET 3` interface)
     * `EFI` (AMD CPU with `VMXNET 3` interface)
+
+* OpenStack
 
 ### applications:
 
