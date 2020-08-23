@@ -1,5 +1,9 @@
 # kite-testbed
 
+![RHEL kernel test on AWS EC2](https://github.com/virt-s1/kite-testbed/workflows/RHEL%20kernel%20test%20on%20AWS%20EC2/badge.svg)
+![RHEL kernel test on ESXi 7.0](https://github.com/virt-s1/kite-testbed/workflows/RHEL%20kernel%20test%20on%20ESXi%207.0/badge.svg)
+![RHEL kernel test on OpenStack](https://github.com/virt-s1/kite-testbed/workflows/RHEL%20kernel%20test%20on%20OpenStack/badge.svg)
+
 Let's run your cloud test on AWS EC2, VMWare ESXi, OpenStack here. `kite-testbed` is just a testbed and provides a test environment for you.
 
 ## How does `kite-testbed` work?
