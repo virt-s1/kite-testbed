@@ -66,6 +66,7 @@
     - name: install kernel on guest
       dnf:
         name: "{{ files | map('regex_replace', '^', temp_folder.path+'/kernel/') | join(', ') }}"
+        disable_gpg_check: yes
         state: present
         allow_downgrade: yes
       become: yes
