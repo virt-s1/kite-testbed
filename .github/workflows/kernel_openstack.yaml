@@ -24,6 +24,7 @@ jobs:
       - name: Checkout kite-test repository
         uses: actions/checkout@v2
         with:
+          ref: framework01
           repository: virt-s1/kite-test
           path: kite-test
 
